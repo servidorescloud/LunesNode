@@ -12,19 +12,30 @@ import scorex.account.{AddressOrAlias, PrivateKeyAccount, PublicKeyAccount}
 import scorex.crypto.encode.Base58
 import scorex.serialization.Deser
 
+import org.iq80.leveldb.DB
+import org.iq80.leveldb
+
+//import io.lunes.db._    //Maybe for future needs.
+
+import scorex.utils.ScorexLogging
+
+import io.lunes.utils.forceStopApplication
+
+import scala.util.control.NonFatal
+import scala.Option
 import scala.util.{Failure, Success, Try}
 
-/**
-  *
-  * @param assetId
-  * @param sender
-  * @param recipient
-  * @param amount
-  * @param timestamp
-  * @param feeAssetId
-  * @param fee
-  * @param userdata
-  * @param signature
+/** Registry Transaction Case class.
+  * @param assetId The Option for AssetID.
+  * @param sender The Public Key for the Sender's Account.
+  * @param recipient The recipient for the Transaction.
+  * @param amount The Amount for the transaction.
+  * @param timestamp The Timestamp.
+  * @param feeAssetId The Option for the Asset ID for fee.
+  * @param fee The fee.
+  * @param userdata The Raw User Data.
+  * @param signature The Signature.
+  * @param db The input database.
   */
 case class RegistryTransaction private(assetId: Option[AssetId],
                                        sender: PublicKeyAccount,
@@ -34,7 +45,8 @@ case class RegistryTransaction private(assetId: Option[AssetId],
                                        feeAssetId: Option[AssetId],
                                        fee: Long,
                                        userdata: Array[Byte],
-                                       signature: ByteStr)
+                                       signature: ByteStr,
+                                       db: DB)
   extends SignedTransaction with FastHashId {
   override val transactionType: TransactionType.Value = TransactionType.RegistryTransaction
 
@@ -70,18 +82,15 @@ case class RegistryTransaction private(assetId: Option[AssetId],
 
 }
 
-/**
-  *
-  */
+/** Registry Transaction Companion object.*/
 object RegistryTransaction {
 
   val MaxUserdata = 140
-  val MaxUserdataLength = base58Length(MaxUserdata)
+  val MaxUserdataLength = base58Length(MaxUserdata)   // private or public?
 
-  /**
-    *
-    * @param bytes
-    * @return
+  /** Parses the Tail of the input array.
+    * @param bytes The input array.
+    * @return Returns a Try for RegistryTransaction.
     */
   def parseTail(bytes: Array[Byte]): Try[RegistryTransaction] = Try {
 
@@ -103,18 +112,18 @@ object RegistryTransaction {
     } yield tt).fold(left => Failure(new Exception(left.toString)), right => Success(right))
   }.flatten
 
-  /**
-    *
-    * @param assetId
-    * @param sender
-    * @param recipient
-    * @param amount
-    * @param timestamp
-    * @param feeAssetId
-    * @param feeAmount
-    * @param userdata
-    * @param signature
-    * @return
+  /** Factory Method for RegistryTransaction.
+    * @param assetId The Option for AssetID.
+    * @param sender The Public Key for the Sender's Account.
+    * @param recipient The recipient for the Transaction.
+    * @param amount The Amount for the transaction.
+    * @param timestamp The Timestamp.
+    * @param feeAssetId The Option for the Asset ID for fee.
+    * @param fee The fee.
+    * @param userdata The Raw User Data.
+    * @param signature The Signature.
+    * @param db The input database.
+    * @return The new Registry Transaction object.
     */
   def create(assetId: Option[AssetId],
              sender: PublicKeyAccount,
@@ -124,7 +133,8 @@ object RegistryTransaction {
              feeAssetId: Option[AssetId],
              feeAmount: Long,
              userdata: Array[Byte],
-             signature: ByteStr): Either[ValidationError, RegistryTransaction] = {
+             signature: ByteStr,
+             db:DB): Either[ValidationError, RegistryTransaction] = {
     if (userdata.length > RegistryTransaction.MaxUserdata) {
       Left(ValidationError.TooBigArray)
     } else if (amount <= 0) {
@@ -133,22 +143,23 @@ object RegistryTransaction {
       Left(ValidationError.OverflowError) // CHECK THAT fee+amount won't overflow Long
     } else if (feeAmount <= 0) {
       Left(ValidationError.InsufficientFee)
+    } else if (!isUserdataDefined(userdata, db)){
+      Left(ValidationError.GenericError("Undefined User"))
     } else {
       Right(RegistryTransaction(assetId, sender, recipient, amount, timestamp, feeAssetId, feeAmount, userdata, signature))
     }
   }
 
-  /**
-    *
-    * @param assetId
-    * @param sender
-    * @param recipient
-    * @param amount
-    * @param timestamp
-    * @param feeAssetId
-    * @param feeAmount
-    * @param userdata
-    * @return
+  /** Alternative Factory Method for RegistryTransaction.
+    * @param assetId The Option for AssetID.
+    * @param sender The Public Key for the Sender's Account.
+    * @param recipient The recipient for the Transaction.
+    * @param amount The Amount for the transaction.
+    * @param timestamp The Timestamp.
+    * @param feeAssetId The Option for the Asset ID for fee.
+    * @param userdata The Raw User Data.
+    * @param db The input database.
+    * @return The new Registry Transaction object.
     */
   def create(assetId: Option[AssetId],
              sender: PrivateKeyAccount,
@@ -157,9 +168,29 @@ object RegistryTransaction {
              timestamp: Long,
              feeAssetId: Option[AssetId],
              feeAmount: Long,
-             userdata: Array[Byte]): Either[ValidationError, RegistryTransaction] = {
-    create(assetId, sender, recipient, amount, timestamp, feeAssetId, feeAmount, userdata, ByteStr.empty).right.map { unsigned =>
+             userdata: Array[Byte],
+             db: DB): Either[ValidationError, RegistryTransaction] = {
+    create(assetId, sender, recipient, amount, timestamp, feeAssetId, feeAmount, userdata, ByteStr.empty, db).right.map { unsigned =>
       unsigned.copy(signature = ByteStr(crypto.sign(sender, unsigned.bodyBytes())))
+    }
+  }
+
+  /** Checks if User Data is already defined in the Database.
+    * @param udata The hashed user data.
+    * @param db The input database.
+    * @return Returns true if it is defined.
+    */
+  private def isUserdataDefined(udata : Array[Byte], db:DB):Boolean = {
+    try {
+      Option(db.get(udata)) match {
+        case Some(rValue) => true
+        case None => false
+      }
+    } catch {
+      case NonFatal(t) =>
+        log.error(message="LevelDB get error", t)
+        forceStopApplication()
+        throw t
     }
   }
 }
