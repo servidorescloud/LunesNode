@@ -80,11 +80,11 @@ object GenesisTransaction extends {
     }.flatten
 
   def create(recipient: Address, amount: Long, timestamp: Long): Either[ValidationError, GenesisTransaction] = {
-    if (amount < 0) {
-      Left(ValidationError.NegativeAmount(amount, "lunes"))
-    } else {
+    //if (amount < 0) {
+    //  Left(ValidationError.NegativeAmount(amount, "lunes"))
+    //} else {
       val signature = ByteStr(GenesisTransaction.generateSignature(recipient, amount, timestamp))
       Right(GenesisTransaction(recipient, amount, timestamp, signature))
-    }
+   // }
   }
 }

@@ -35,7 +35,7 @@ object FunctionalitySettings {
   val MAINNET = apply(
     featureCheckBlocksPeriod = 5000,
     blocksForFeatureActivation = 4000,
-    allowTemporaryNegativeUntil = Constants.MainTimestamp,
+    allowTemporaryNegativeUntil = Constants.MainTimestamp + 1,
     requireSortedTransactionsAfter = Constants.MainTimestamp,
     generationBalanceDepthFrom50To1000AfterHeight = 0,
     minimalGeneratingBalanceAfter = 0,
