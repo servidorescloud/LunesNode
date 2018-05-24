@@ -14,15 +14,15 @@ object Constants extends ScorexLogging {
   val CoinAbr = "LNS"
   val AgentName = s"Lunes v${VersionStr}"
   val UnitsInLunes = 100000000L
-  val TotalLunes = -60000000L
+  val TotalLunes = 0L
   val InitialBalance = TotalLunes * UnitsInLunes
 
   val MainSchemeCharacter = '0'
   val MainDelay = 60
   //val MainTimestamp = 1523145600000L
-  val MainTimestamp = 1527082247209L
+  val MainTimestamp = 1527125814162L
   //val MainSignature = "5UoT695i3nk3nd553QtRCkmWzRpyQ8oQNCn4Kdrrs6uN6gJKo8LLNskAiYeqYnxdipPfhXXNQkyKaKAA83dwqGqg"
-  val MainSignature = "4ZnBXyZWHT9ZygAEPEn3nZLkr6aNjYn7EUvDnP3X2AVRCHhLZetd3qLtQMpEeno3E15ATCxSe9RssfNMJNeUWKyt"
+  val MainSignature = "3SDfHwGrajnwh1HjXhLH9Ymaf7L5iAKvMSgBbvwzzE92nFM7mmh9UydVAsXAa1CK7rRMAPpuyuMFSyoQvyMVajpP"
 
 //  val MainTransactions = List(
 //    GenesisTransactionSettings("37cjwk5WavHeoCjNUi92vba6KsNAd1uwAso", -30000000000000000L),
@@ -31,7 +31,9 @@ object Constants extends ScorexLogging {
 //  )
 
   val MainTransactions = List(
-    GenesisTransactionSettings("37PmDKhJPELpJ15VuGyASmGSRgM3Hw5qZWT", -600000000L)
+    GenesisTransactionSettings("37cvJ3RgqU8MEaXiYygW9wS7tSpkNWbw2km", 300000000L),
+    GenesisTransactionSettings("37PmDKhJPELpJ15VuGyASmGSRgM3Hw5qZWT", 300000000L),
+    GenesisTransactionSettings("37dqXdCYe32LiSgc9KqGxmhh8gKSWncQwKM", -600000000L)
   )
 
   val TestSchemeCharacter = '1'
