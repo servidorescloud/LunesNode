@@ -3,7 +3,8 @@ package io.lunes.network
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPromise}
 import kamon.Kamon
-import kamon.metric.instrument.{Histogram, Memory}
+//import kamon.metric.instrument.{Histogram, Memory}
+import kamon.metric.{Histogram, MeasurementUnit}
 import scorex.network.message.{Message => ScorexMessage}
 
 /**
@@ -21,11 +22,19 @@ class TrafficWatcher extends ChannelDuplexHandler {
   private val incoming: Map[ScorexMessage.MessageCode, Histogram] = specsByCodes.map { case (code, spec) =>
     code -> createHistogram("incoming", spec)
   }
-
+/*
   private def createHistogram(dir: String, spec: BasicMessagesRepo.Spec) = Kamon.metrics.histogram("traffic", Map(
     "type" -> spec.messageName,
     "dir" -> dir
   ), Memory.Bytes)
+*/
+  private def createHistogram(dir: String, spec: BasicMessagesRepo.Spec) =
+    Kamon
+      .histogram("traffic", MeasurementUnit.information.bytes)
+      .refine(
+        "type" -> spec.messageName,
+        "dir" -> dir
+      )
 
   /**
     *

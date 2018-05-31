@@ -1,6 +1,6 @@
 package io.lunes.metrics
 
-import kamon.metric.instrument.Histogram
+import kamon.metric.Histogram
 import scorex.utils.ScorexLogging
 
 /**

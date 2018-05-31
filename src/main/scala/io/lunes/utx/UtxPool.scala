@@ -20,7 +20,9 @@ import io.lunes.state2.reader.CompositeStateReader.composite
 import io.lunes.state2.reader.SnapshotStateReader
 import io.lunes.state2.{ByteStr, Diff, Portfolio, StateReader}
 import kamon.Kamon
-import kamon.metric.instrument.{Time => KamonTime}
+//import kamon.metric.instrument.{Time => KamonTime}
+import kamon.metric.MeasurementUnit
+import java.time.Duration
 import monix.eval.Task
 import monix.execution.Scheduler
 import scorex.account.Address
@@ -143,9 +145,13 @@ class UtxPoolImpl(time: Time,
     */
   override def close(): Unit = cleanup.cancel()
 
-  private val utxPoolSizeStats = Kamon.metrics.minMaxCounter("utx-pool-size", 500.millis)
-  private val processingTimeStats = Kamon.metrics.histogram("utx-transaction-processing-time", KamonTime.Milliseconds)
-  private val putRequestStats = Kamon.metrics.counter("utx-pool-put-if-new")
+//  private val utxPoolSizeStats = Kamon.metrics.minMaxCounter("utx-pool-size", 500.millis)
+  private val duration = Duration.ofMillis(500)
+  private val utxPoolSizeStats = Kamon.rangeSampler("utx-pool-size", MeasurementUnit.time.milliseconds, Option(duration), None)
+//  private val processingTimeStats = Kamon.metrics.histogram("utx-transaction-processing-time", KamonTime.Milliseconds)
+  private val processingTimeStats = Kamon.histogram("utx-transaction-processing-time", MeasurementUnit.time.milliseconds)
+//  private val putRequestStats = Kamon.metrics.counter("utx-pool-put-if-new")
+  private val putRequestStats = Kamon.counter("utx-pool-put-if-new")
 
   /** Remove Expired Transactions from the Pool.
     * @param currentTs Sets Current Time Stamp.

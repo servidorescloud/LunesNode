@@ -11,7 +11,7 @@ object Dependencies {
 
   def nettyModule(module: String) = "io.netty" % s"netty-$module" % "4.1.22.Final"
 
-  def kamonModule(v: String)(module: String) = "io.kamon" %% s"kamon-$module" % v
+  def kamonModule(module: String, v: String) = "io.kamon" %% s"kamon-$module" % v
 
   val asyncHttpClient = "org.asynchttpclient" % "async-http-client" % "2.1.0-alpha22"
 
@@ -66,14 +66,14 @@ object Dependencies {
     "org.ethereum" % "leveldbjni-all" % "1.18.3"
   )
 
-  lazy val metrics = {
-    Seq("core", "system-metrics").map(kamonModule("0.6.7")) ++
-      Seq("akka-2.4", "influxdb").map(kamonModule("0.6.8")) ++
-      Seq(
-        "org.influxdb" % "influxdb-java"    % "2.7",
-        "io.kamon"     %% "kamon-autoweave" % "0.6.5"
-      )
-  }.map(_.exclude("org.asynchttpclient", "async-http-client"))
+  lazy val metrics = Seq(
+    kamonModule("core", "1.1.2"),
+    kamonModule("system-metrics", "1.0.0"),
+    kamonModule("akka-2.4", "1.0.1"),
+    kamonModule("influxdb", "1.0.0-4fa32c762f33782653476e7e530a93b2bb08a4c3"), // https://github.com/kamon-io/kamon-influxdb/issues/17#issuecomment-374666541
+    kamonModule("autoweave", "0.6.5"),
+    "org.influxdb" % "influxdb-java" % "2.7"
+  ).map(_.exclude("org.asynchttpclient", "async-http-client"))
 
   lazy val fp = Seq(
     "org.typelevel" %% "cats-core" % "1.0.1",

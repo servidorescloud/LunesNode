@@ -234,7 +234,8 @@ class LunesNode(val actorSystem: ActorSystem, val settings: LunesSettings, confi
 
     //on unexpected shutdown
     sys.addShutdownHook {
-      Kamon.shutdown()
+      //Kamon.shutdown()
+      Kamon.stopAllReporters()
       Metrics.shutdown()
       shutdown(utxStorage, network)
     }
@@ -354,7 +355,9 @@ object LunesNode extends ScorexLogging {
     }
 
     val settings = LunesSettings.fromConfig(config)
-    Kamon.start(config)
+    //Kamon.start(config)
+    Kamon.reconfigure(config)
+    Kamon.loadReportersFromConfig()
     val isMetricsStarted = Metrics.start(settings.metrics)
 
     RootActorSystem.start("lunes", config) { actorSystem =>

@@ -14,7 +14,8 @@ import io.lunes.state2.reader.CompositeStateReader.composite
 import io.lunes.state2.reader.SnapshotStateReader
 import io.lunes.utils.{HeightInfo, UnsupportedFeature, forceStopApplication}
 import kamon.Kamon
-import kamon.metric.instrument.Time
+//import kamon.metric.instrument.Time
+import kamon.metric.MeasurementUnit
 import monix.eval.Coeval
 import monix.reactive.Observable
 import monix.reactive.subjects.ConcurrentSubject
@@ -321,11 +322,16 @@ class BlockchainUpdaterImpl private(persisted: StateWriter with SnapshotStateRea
 
 object BlockchainUpdaterImpl extends ScorexLogging {
 
-  private val blockMicroForkStats = Kamon.metrics.counter("block-micro-fork")
-  private val microMicroForkStats = Kamon.metrics.counter("micro-micro-fork")
-  private val microBlockForkStats = Kamon.metrics.counter("micro-block-fork")
-  private val microBlockForkHeightStats = Kamon.metrics.histogram("micro-block-fork-height")
-  private val forgeBlockTimeStats = Kamon.metrics.histogram("forge-block-time", Time.Milliseconds)
+//  private val blockMicroForkStats = Kamon.metrics.counter("block-micro-fork")
+  private val blockMicroForkStats = Kamon.counter("block-micro-fork")
+//  private val microMicroForkStats = Kamon.metrics.counter("micro-micro-fork")
+  private val microMicroForkStats = Kamon.counter("micro-micro-fork")
+//  private val microBlockForkStats = Kamon.metrics.counter("micro-block-fork")
+  private val microBlockForkStats = Kamon.counter("micro-block-fork")
+//  private val microBlockForkHeightStats = Kamon.metrics.histogram("micro-block-fork-height")
+  private val microBlockForkHeightStats = Kamon.histogram("micro-block-fork-height")
+//  private val forgeBlockTimeStats = Kamon.metrics.histogram("forge-block-time", Time.Milliseconds)
+  private val forgeBlockTimeStats = Kamon.histogram("forge-block-time", MeasurementUnit.time.milliseconds)
 
   def apply(persistedState: StateWriter with SnapshotStateReader,
             history: HistoryWriterImpl,

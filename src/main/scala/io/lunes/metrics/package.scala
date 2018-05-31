@@ -1,6 +1,6 @@
 package io.lunes
 
-import kamon.metric.instrument.Histogram
+import kamon.metric.Histogram
 
 /**
   *

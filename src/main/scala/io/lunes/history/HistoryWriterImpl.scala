@@ -318,7 +318,10 @@ object HistoryWriterImpl extends ScorexLogging {
             featuresSettings: FeaturesSettings, time: Time = NTP): Try[HistoryWriterImpl] =
     createWithVerification[HistoryWriterImpl](new HistoryWriterImpl(db, synchronizationToken, functionalitySettings, featuresSettings, time))
 
-  private val blockHeightStats = Kamon.metrics.histogram("block-height")
-  private val blockSizeStats = Kamon.metrics.histogram("block-size-bytes")
-  private val transactionsInBlockStats = Kamon.metrics.histogram("transactions-in-block")
+//  private val blockHeightStats = Kamon.metrics.histogram("block-height")
+  private val blockHeightStats = Kamon.histogram("block-height")
+//  private val blockSizeStats = Kamon.metrics.histogram("block-size-bytes")
+  private val blockSizeStats = Kamon.histogram("block-size-bytes")
+//  private val transactionsInBlockStats = Kamon.metrics.histogram("transactions-in-block")
+  private val transactionsInBlockStats = Kamon.histogram("transactions-in-block")
 }

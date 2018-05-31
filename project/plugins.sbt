@@ -6,12 +6,13 @@ resolvers ++= Seq(
 )
 
 Seq(
-  "com.eed3si9n" % "sbt-assembly" % "0.14.5",
-  "com.typesafe.sbt" % "sbt-native-packager" % "1.3.2",
-  "org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0",
-  "org.scoverage" % "sbt-scoverage" % "1.5.1",
-  "se.marcuslonnberg" % "sbt-docker" % "1.4.1",
-  "com.typesafe.sbt" % "sbt-git" % "0.9.3"
+  "com.eed3si9n"       % "sbt-assembly"           % "0.14.5",
+  "com.typesafe.sbt"   % "sbt-native-packager"    % "1.3.2",
+  "org.scalastyle"     %% "scalastyle-sbt-plugin" % "1.0.0",
+  "org.scoverage"      % "sbt-scoverage"          % "1.5.1",
+  "se.marcuslonnberg"  % "sbt-docker"             % "1.4.1",
+  "com.typesafe.sbt"   % "sbt-git"                % "0.9.3",
+  "pl.project13.scala" % "sbt-jmh"                % "0.3.3"
 ).map(addSbtPlugin)
 
 libraryDependencies ++= Seq(

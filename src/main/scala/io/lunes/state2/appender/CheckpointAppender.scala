@@ -56,6 +56,8 @@ object CheckpointAppender extends ScorexLogging {
     }
   }
 
-  private val blockBlockForkStats = Kamon.metrics.counter("block-fork")
-  private val blockForkHeightStats = Kamon.metrics.histogram("block-fork-height")
+//  private val blockBlockForkStats = Kamon.metrics.counter("block-fork")
+  private val blockBlockForkStats = Kamon.counter("block-fork")
+//  private val blockForkHeightStats = Kamon.metrics.histogram("block-fork-height")
+  private val blockForkHeightStats = Kamon.histogram("block-fork-height")
 }

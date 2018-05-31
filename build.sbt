@@ -1,7 +1,5 @@
-import com.typesafe.sbt.packager.archetypes.TemplateWriter
-import sbt.Keys.{sourceGenerators, _}
+import sbt.Keys._
 import sbt._
-import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
 enablePlugins(GitVersioning)
 git.useGitDescribe := true
@@ -24,6 +22,7 @@ scalacOptions ++= Seq(
   "-Xlint")
 
 resolvers += Resolver.bintrayRepo("ethereum", "maven")
+resolvers += Resolver.bintrayRepo("kamon-io", "snapshots") // https://github.com/kamon-io/kamon-influxdb/issues/17#issuecomment-374666541
 
 val network = SettingKey[Network]("network")
 network := { Network(sys.props.get("network")) }
